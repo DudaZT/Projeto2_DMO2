@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "882020853267",
+    "project_id": "sprinttrack-53f54",
+    "storage_bucket": "sprinttrack-53f54.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:882020853267:android:5412b2a45f7951865fc1e6",
+        "android_client_info": {
+          "package_name": "com.example.sprinttrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3rtalfoEl3J5PeQiUN35VeTupazN9PpU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

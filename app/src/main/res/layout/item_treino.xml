@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="14dp"
+    android:layout_marginVertical="8dp"
+    app:cardBackgroundColor="@color/card"
+    app:cardCornerRadius="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/txtTempo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12.53s"
+            android:textColor="@color/green"
+            android:textSize="32sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/txtPassos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="32 passos"
+            android:textColor="@color/white"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/txtData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="16/05/2026"
+            android:textColor="@color/gray_text"
+            android:textSize="14sp"/>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
