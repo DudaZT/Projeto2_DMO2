@@ -1,9 +1,14 @@
 package com.example.sprinttrack.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.sprinttrack.databinding.ActivitySprintBinding
 import com.example.sprinttrack.firebase.FirebaseConfig
 import com.example.sprinttrack.model.Treino
@@ -22,6 +27,21 @@ class SprintActivity : AppCompatActivity() {
 
     private var iniciou = false
     private var passos = 0
+
+    // CONTRATO PARA SOLICITAR PERMISSÃO
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            executarSensores()
+        } else {
+            Toast.makeText(
+                this,
+                "Permissão necessária para contar os passos!",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,20 +86,37 @@ class SprintActivity : AppCompatActivity() {
 
         binding.btnPreparar.setOnClickListener {
 
-            Toast.makeText(
-                this,
-                "Corra para iniciar!",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            motionSensor.start()
-            stepCounter.start()
+            // VERIFICAÇÃO DE PERMISSÃO EM TEMPO DE EXECUÇÃO (REQUISITO DO ANDROID 10+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.ACTIVITY_RECOGNITION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    executarSensores()
+                } else {
+                    requestPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+                }
+            } else {
+                executarSensores()
+            }
         }
 
         binding.btnFinalizar.setOnClickListener {
 
             finalizarTreino()
         }
+    }
+
+    private fun executarSensores() {
+        Toast.makeText(
+            this,
+            "Corra para iniciar!",
+            Toast.LENGTH_SHORT
+        ).show()
+
+        motionSensor.start()
+        stepCounter.start()
     }
 
     private fun finalizarTreino() {

@@ -228,7 +228,7 @@ Durante o desenvolvimento do projeto foram aplicados conceitos como:
 
 # 👩‍💻 Desenvolvido por
 
-* Maria Eduarda Zanetti Moro e Chris Amancio
+* Maria Eduarda Zanetti Moro e Christian Amancio
 
 ---
 
