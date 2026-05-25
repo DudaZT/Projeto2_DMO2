@@ -17,6 +17,14 @@
         android:padding="20dp">
 
         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Toque para ver detalhes"
+            android:textColor="@color/gray_text"
+            android:textSize="14sp" />
+
+        <TextView
             android:id="@+id/txtTempo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,6 +51,29 @@
             android:textColor="@color/gray_text"
             android:textSize="14sp"/>
 
+        <Button
+            android:id="@+id/btnExcluir"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="EXCLUIR SPRINT"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=">"
+                android:textColor="@color/green"
+                android:textSize="22sp"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

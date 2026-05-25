@@ -26,6 +26,8 @@
         android:textColor="@color/green"
         android:layout_marginTop="40dp"/>
 
+
+
     <TextView
         android:id="@+id/txtPassos"
         android:layout_width="wrap_content"
@@ -35,12 +37,28 @@
         android:textSize="22sp"
         android:layout_marginTop="30dp"/>
 
+    <EditText
+        android:id="@+id/edtObservacao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Observação"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btnMicrofone"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:text="FALAR OBSERVAÇÃO"
+        android:layout_marginTop="12dp"/>
+
     <Button
         android:id="@+id/btnPreparar"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:text="PREPARAR"
         android:layout_marginTop="40dp"/>
+
+
 
     <Button
         android:id="@+id/btnFinalizar"

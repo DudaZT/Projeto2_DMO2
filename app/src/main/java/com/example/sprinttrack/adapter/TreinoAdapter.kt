@@ -7,7 +7,9 @@ import com.example.sprinttrack.databinding.ItemTreinoBinding
 import com.example.sprinttrack.model.Treino
 
 class TreinoAdapter(
-    private val lista: List<Treino>
+    private val lista: List<Treino>,
+    private val onDelete: (Treino) -> Unit,
+    private val onClick: (Treino) -> Unit
 ) : RecyclerView.Adapter<TreinoAdapter.MyViewHolder>() {
 
     inner class MyViewHolder(
@@ -45,5 +47,15 @@ class TreinoAdapter(
 
         holder.binding.txtData.text =
             treino.data
+
+        holder.itemView.setOnClickListener {
+
+            onClick(treino)
+        }
+
+        holder.binding.btnExcluir.setOnClickListener {
+
+            onDelete(treino)
+        }
     }
 }

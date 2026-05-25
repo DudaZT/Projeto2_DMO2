@@ -52,7 +52,7 @@
                     android:id="@+id/txtBestTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="12.53s"
+                    android:text="0s"
                     android:textColor="@color/green"
                     android:textSize="36sp"
                     android:textStyle="bold"/>
