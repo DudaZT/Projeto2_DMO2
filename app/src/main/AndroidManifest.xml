@@ -21,12 +21,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SprintTrack">
+
+        <activity
+            android:name="com.example.sprinttrack.ui.LeaderboardActivity"
+            android:exported="false" />
+
         <activity
             android:name=".ui.DetalheTreinoActivity"
             android:exported="false" />
+
         <activity
             android:name=".auth.RegisterActivity"
             android:exported="false" />
+
         <activity
             android:name=".auth.LoginActivity"
             android:exported="true">
@@ -36,12 +43,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".ui.SprintActivity"
             android:exported="false" />
+
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+
     </application>
 
 </manifest>

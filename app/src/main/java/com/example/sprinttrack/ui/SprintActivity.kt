@@ -297,72 +297,62 @@ class SprintActivity :
     }
 
     private fun finalizarTreino() {
-
         finishPlayer?.release()
-
-        finishPlayer = MediaPlayer.create(
-            this,
-            R.raw.finish
-        )
-
+        finishPlayer = MediaPlayer.create(this, R.raw.finish)
         finishPlayer?.start()
 
         binding.chronometer.stop()
-
         motionSensor.stop()
-
         stepCounter.stop()
 
-        val tempoMillis =
-            SystemClock.elapsedRealtime() -
-                    binding.chronometer.base
+        val tempoMillis = SystemClock.elapsedRealtime() - binding.chronometer.base
+        val tempoSegundos = tempoMillis / 1000.0
+        val uid = FirebaseConfig.auth.currentUser?.uid ?: ""
+        val dataAtual = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
 
-        val tempoSegundos =
-            tempoMillis / 1000.0
+        // 1. Busca os dados de Perfil (Nome e Foto) antes de salvar o treino
+        if (uid.isNotEmpty()) {
+            FirebaseConfig.firestore
+                .collection("usuarios")
+                .document(uid)
+                .get()
+                .addOnSuccessListener { document ->
 
-        val uid =
-            FirebaseConfig.auth.currentUser?.uid ?: ""
+                    val nomeUsuario = document.getString("nome") ?: "Corredor Anônimo"
+                    val fotoUsuario = document.getString("foto") ?: ""
 
-        val dataAtual =
-            SimpleDateFormat(
-                "dd/MM/yyyy HH:mm",
-                Locale.getDefault()
-            ).format(Date())
+                    // 2. Monta o dicionário completo do Treino contendo os dados do atleta
+                    val mapaTreino = hashMapOf(
+                        "uid" to uid,
+                        "tempo" to tempoSegundos,
+                        "passos" to passos,
+                        "data" to dataAtual,
+                        "observacao" to binding.edtObservacao.text.toString(),
+                        "fotoUrl" to "",
+                        "timestamp" to System.currentTimeMillis(),
+                        "nome" to nomeUsuario,  // Campo lido pela Leaderboard
+                        "foto" to fotoUsuario   // Campo de imagem Base64 lido pela Leaderboard
+                    )
 
-        val treino = Treino(
-            uid = uid,
-            tempo = tempoSegundos,
-            passos = passos,
-            data = dataAtual,
-            observacao =
-                binding.edtObservacao.text.toString(),
-            fotoUrl = "",
-            timestamp = System.currentTimeMillis()
-        )
-
-        FirebaseConfig.firestore
-            .collection("treinos")
-            .add(treino)
-            .addOnSuccessListener {
-
-                Toast.makeText(
-                    this,
-                    "Treino salvo!",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                mostrarNotificacao()
-
-                finish()
-            }
-            .addOnFailureListener {
-
-                Toast.makeText(
-                    this,
-                    "Erro ao salvar treino",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+                    // 3. Persiste o treino atualizado no nó global de treinos
+                    FirebaseConfig.firestore
+                        .collection("treinos")
+                        .add(mapaTreino)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Treino salvo!", Toast.LENGTH_SHORT).show()
+                            mostrarNotificacao()
+                            finish()
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this, "Erro ao salvar treino", Toast.LENGTH_SHORT).show()
+                        }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Erro ao conectar com perfil do usuário", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            Toast.makeText(this, "Usuário não autenticado", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun mostrarNotificacao() {

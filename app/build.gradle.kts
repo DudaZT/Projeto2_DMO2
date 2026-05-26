@@ -43,6 +43,7 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.remote.creation.core)
     implementation(libs.material)
 
     implementation("androidx.activity:activity-ktx:1.9.0")

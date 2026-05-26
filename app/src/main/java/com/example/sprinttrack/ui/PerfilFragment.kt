@@ -74,7 +74,8 @@ class PerfilFragment : Fragment() {
                 binding.txtEmail.text =
                     it.getString("email")
 
-                val fotoBase64 = it.getString("fotoBase64")
+                // Tenta ler por 'fotoBase64', se estiver nulo tenta ler pela chave curta 'foto'
+                val fotoBase64 = it.getString("fotoBase64") ?: it.getString("foto")
                 if (!fotoBase64.isNullOrEmpty()) {
                     val bitmap = ImageUtils.base64ToBitmap(fotoBase64)
                     bitmap?.let { bmp ->
@@ -108,7 +109,6 @@ class PerfilFragment : Fragment() {
         }
     }
 
-    // REQUISITAR A PERMISSÃO DE CÂMERA EM TEMPO DE EXECUÇÃO
     private val requisitarCameraLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -145,15 +145,21 @@ class PerfilFragment : Fragment() {
 
         val stringBase64 = ImageUtils.bitmapToBase64(bitmap)
 
+        // Alinhamento das chaves: Atualiza tanto a chave antiga quanto a nova curta usada pela Leaderboard
+        val atualizacaoFoto = hashMapOf<String, Any>(
+            "fotoBase64" to stringBase64,
+            "foto" to stringBase64
+        )
+
         FirebaseConfig.firestore
             .collection("usuarios")
             .document(uid)
-            .update("fotoBase64", stringBase64)
+            .update(atualizacaoFoto)
             .addOnSuccessListener {
                 binding.imgPerfil.setImageBitmap(bitmap)
                 Toast.makeText(
                     requireContext(),
-                    "Foto de perfil atualizada!",
+                    "Foto de perfil updated!",
                     Toast.LENGTH_SHORT
                 ).show()
             }
