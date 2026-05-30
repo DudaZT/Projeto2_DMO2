@@ -13,6 +13,13 @@ import com.example.sprinttrack.databinding.FragmentHistoricoBinding
 import com.example.sprinttrack.firebase.FirebaseConfig
 import com.example.sprinttrack.model.Treino
 import com.google.firebase.firestore.Query
+
+/**
+ * O histórico carrega apenas os treinos do usuário logado,
+ * ordenados por timestamp.
+ * Cada item permite abrir detalhes ou excluir.
+ * A exclusão remove do Firestore e recarrega a lista
+ */
 class HistoricoFragment : Fragment() {
 
     private var _binding: FragmentHistoricoBinding? = null
@@ -32,14 +39,18 @@ class HistoricoFragment : Fragment() {
             false
         )
 
-        binding.recyclerTreinos.layoutManager =
-            LinearLayoutManager(requireContext())
+        // Configura o RecyclerView com lista vertical
+        binding.recyclerTreinos.layoutManager = LinearLayoutManager(requireContext())
 
         carregarTreinos()
 
         return binding.root
     }
 
+    /**
+     * Busca todos os treinos do usuário logado,
+     * ordenados do mais recente para o mais antigo.
+     */
     private fun carregarTreinos() {
 
         val uid =
@@ -47,10 +58,10 @@ class HistoricoFragment : Fragment() {
 
         FirebaseConfig.firestore
             .collection("treinos")
-            .whereEqualTo("uid", uid)
+            .whereEqualTo("uid", uid) // Filtra por usuário
             .orderBy(
                 "timestamp",
-                Query.Direction.DESCENDING
+                Query.Direction.DESCENDING // Mais recentes primeiro
             )
             .get()
             .addOnSuccessListener { result ->
@@ -62,11 +73,12 @@ class HistoricoFragment : Fragment() {
                     val treino =
                         document.toObject(Treino::class.java)
 
-                    treino.id = document.id
+                    treino.id = document.id // Guarda o ID para operações de delete
 
                     listaTreinos.add(treino)
                 }
 
+                // Vincula o adapter com os callbacks
                 binding.recyclerTreinos.adapter =
                     TreinoAdapter(
                         listaTreinos,
@@ -92,6 +104,9 @@ class HistoricoFragment : Fragment() {
             }
     }
 
+    /**
+     * Abre a tela de detalhes passando os dados do treino via Intent.
+     */
     private fun abrirDetalhes(treino: Treino) {
 
         val intent =
@@ -113,6 +128,10 @@ class HistoricoFragment : Fragment() {
 
         startActivity(intent)
     }
+
+    /**
+     * Remove um treino do Firestore e atualiza a lista.
+     */
     private fun excluirTreino(treino: Treino) {
 
         FirebaseConfig.firestore
@@ -127,7 +146,7 @@ class HistoricoFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
 
-                carregarTreinos()
+                carregarTreinos() // Recarrega a lista atualizada
             }
     }
 

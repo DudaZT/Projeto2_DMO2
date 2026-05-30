@@ -8,6 +8,12 @@ import com.example.sprinttrack.databinding.ActivityLeaderboardBinding
 import com.example.sprinttrack.firebase.FirebaseConfig
 import com.example.sprinttrack.model.LeaderboardItem
 
+/**
+ * A LeaderboardActivity exibe o ranking completo com até 10 posições.
+ * Os dados de nome e foto vêm junto com o treino
+ * salvamos essas informações no momento da finalização da corrida
+ * para não precisar de consulta extra.
+ */
 class LeaderboardActivity : AppCompatActivity() {
 
     private val binding by lazy {
@@ -18,8 +24,9 @@ class LeaderboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // Configura o RecyclerView para exibir o ranking
         binding.rvLeaderboard.layoutManager = LinearLayoutManager(this)
-        binding.rvLeaderboard.setHasFixedSize(true)
+        binding.rvLeaderboard.setHasFixedSize(true) // Otimização de performance
 
         binding.btnVoltar.setOnClickListener {
             finish()
@@ -28,6 +35,10 @@ class LeaderboardActivity : AppCompatActivity() {
         carregarTop10()
     }
 
+    /**
+     * Carrega os 10 treinos mais eficientes de todos os usuários.
+     * Combina dados dos treinos com nome e foto do perfil.
+     */
     private fun carregarTop10() {
         FirebaseConfig.firestore
             .collection("treinos")
@@ -46,6 +57,7 @@ class LeaderboardActivity : AppCompatActivity() {
                     val nome = doc.getString("nome") ?: "Corredor Anônimo"
                     val foto = doc.getString("foto") ?: ""
 
+                    // Filtra registros inválidos
                     if (tempo <= 0.1 || passos == 0) return@mapNotNull null
 
                     val eficiencia = passos / tempo
@@ -60,6 +72,7 @@ class LeaderboardActivity : AppCompatActivity() {
                     )
                 }.sortedByDescending { it.eficiencia }
 
+                // Limita a 10 itens
                 val listaTop10 = if (treinosOrdenados.size > 10) {
                     treinosOrdenados.subList(0, 10)
                 } else {

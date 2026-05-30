@@ -27,24 +27,40 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import com.example.sprinttrack.helper.ReconhecimentoHelper
+
+/**
+ * Tela principal do treino.
+ * Integra os 3 recursos principais: sensores de movimento, microfone e notificação.
+ * Implementa a interface ReconhecimentoHelper. Callback para receber o texto ditado.
+ * Esta é a tela mais importante do app.
+ * Ela integra os 3 recursos: sensores de movimento para detectar a corrida
+ * e contar passos, microfone para ditar observações,
+ * e sons + notificação como feedback.
+ * O fluxo é: preparar → contagem regressiva com som → sprint com sensores ativos →
+ * finalizar com som de chegada → salvar no Firestore com notificação.
+ */
 class SprintActivity :
     AppCompatActivity(),
     ReconhecimentoHelper.Callback {
 
     private lateinit var binding: ActivitySprintBinding
 
+    // Gerenciadores dos sensores
     private lateinit var motionSensor: MotionSensorManager
     private lateinit var stepCounter: StepCounterManager
 
+    // Estado do treino
     private var iniciou = false
     private var passos = 0
 
+    // Players para os sons de início e fim
     private var startPlayer: MediaPlayer? = null
     private var finishPlayer: MediaPlayer? = null
 
+    // Helper para reconhecimento de voz
     private lateinit var reconhecimentoHelper: ReconhecimentoHelper
 
-    // PERMISSÃO SENSOR
+    // Permissão de sensores de atividade física
     private val requestActivityPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -63,7 +79,7 @@ class SprintActivity :
         }
     }
 
-    // PERMISSÃO MICROFONE
+    // Permissão do microfone
     private val requestAudioPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -82,7 +98,7 @@ class SprintActivity :
         }
     }
 
-
+    // Permissão de notificações
     private val requestNotificationPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -105,6 +121,7 @@ class SprintActivity :
 
         setContentView(binding.root)
 
+        // Inicializa o helper de voz passando 'this' como callback
         reconhecimentoHelper = ReconhecimentoHelper(this, this)
 
         verificarPermissaoNotificacao()
@@ -116,6 +133,9 @@ class SprintActivity :
         configurarBotoes()
     }
 
+    /**
+     * notificações precisam de permissão explícita do usuário.
+     */
     private fun verificarPermissaoNotificacao() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -134,6 +154,9 @@ class SprintActivity :
         }
     }
 
+    /**
+     * Cria o canal de notificação
+     */
     private fun criarCanalNotificacao() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -153,10 +176,13 @@ class SprintActivity :
             manager.createNotificationChannel(channel)
         }
     }
+    /**
+     * Inicializa os gerenciadores de sensores com seus respectivos callbacks.
+     */
     private fun configurarSensores() {
-
+        // MotionSensor: o callback está vazio porque usamos apenas para registro
         motionSensor = MotionSensorManager(this) {}
-
+        // StepCounter: atualiza o TextView de passos na thread principal
         stepCounter = StepCounterManager(this) { totalPassos ->
 
             passos = totalPassos
@@ -169,6 +195,9 @@ class SprintActivity :
         }
     }
 
+    /**
+     * Vincula os botões da interface às suas ações.
+     */
     private fun configurarBotoes() {
 
         binding.btnPreparar.setOnClickListener {
@@ -198,6 +227,9 @@ class SprintActivity :
         }
     }
 
+    /**
+     * Verifica permissão de atividade física
+     */
     private fun verificarPermissaoSensores() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -225,6 +257,10 @@ class SprintActivity :
     }
 
     // CONTAGEM REGRESSIVA + SOM
+    /**
+     * Inicia a contagem regressiva de 3 segundos com som de largada.
+     * Desabilita o botão para evitar múltiplos cliques.
+     */
     private fun iniciarContagem() {
 
         binding.btnPreparar.isEnabled = false
@@ -235,6 +271,7 @@ class SprintActivity :
             Toast.LENGTH_SHORT
         ).show()
 
+        // Toca o som de preparação
         startPlayer?.release()
 
         startPlayer = MediaPlayer.create(
@@ -245,6 +282,7 @@ class SprintActivity :
         startPlayer?.start()
 
         // ESPERA 3 SEGUNDOS
+        // Agenda o início após 3 segundos
         Handler(Looper.getMainLooper()).postDelayed({
 
             iniciarSprint()
@@ -252,10 +290,16 @@ class SprintActivity :
         }, 3000)
     }
 
+    /**
+     * Inicia efetivamente o treino:
+     * - Dispara o cronômetro
+     * - Ativa acelerômetro e contador de passos
+     */
     private fun iniciarSprint() {
 
         iniciou = true
 
+        // Cronômetro: base é o tempo atual decorrido desde o boot
         binding.chronometer.base =
             SystemClock.elapsedRealtime()
 
@@ -296,15 +340,21 @@ class SprintActivity :
         reconhecimentoHelper.iniciarReconhecimento()
     }
 
+    /**
+     * Para os sensores, calcula o tempo, busca dados do usuário e salva no Firestore.
+     */
     private fun finalizarTreino() {
+        // Som de chegada
         finishPlayer?.release()
         finishPlayer = MediaPlayer.create(this, R.raw.finish)
         finishPlayer?.start()
 
+        // Para sensores e cronômetro
         binding.chronometer.stop()
         motionSensor.stop()
         stepCounter.stop()
 
+        // Calcula tempo decorrido
         val tempoMillis = SystemClock.elapsedRealtime() - binding.chronometer.base
         val tempoSegundos = tempoMillis / 1000.0
         val uid = FirebaseConfig.auth.currentUser?.uid ?: ""
@@ -355,6 +405,9 @@ class SprintActivity :
         }
     }
 
+    /**
+     * Exibe uma notificação local confirmando que o treino foi salvo.
+     */
     private fun mostrarNotificacao() {
 
         val notification =
@@ -374,6 +427,9 @@ class SprintActivity :
         manager.notify(1, notification)
     }
 
+    /**
+     * Quando a voz é reconhecida, preenche automaticamente o campo de observação.
+     */
     override fun onTextoReconhecido(texto: String) {
 
         binding.edtObservacao.setText(texto)
@@ -394,6 +450,9 @@ class SprintActivity :
         ).show()
     }
 
+    /**
+     * Libera todos os recursos: sensores, players de áudio e reconhecedor de voz.
+     */
     override fun onDestroy() {
         super.onDestroy()
 

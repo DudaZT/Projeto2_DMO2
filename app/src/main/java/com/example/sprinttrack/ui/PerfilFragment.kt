@@ -20,6 +20,12 @@ import com.example.sprinttrack.databinding.FragmentPerfilBinding
 import com.example.sprinttrack.firebase.FirebaseConfig
 import com.example.sprinttrack.util.ImageUtils
 
+/**
+ * O PerfilFragment carrega os dados do Firestore,
+ * permite tirar foto com a câmera e fazer logout.
+ * Usamos ActivityResultContracts que é a API moderna para permissões.
+ * A foto é redimensionada e convertida para Base64 antes de salvar.
+ */
 class PerfilFragment : Fragment() {
 
     private var _binding: FragmentPerfilBinding? = null
@@ -39,10 +45,12 @@ class PerfilFragment : Fragment() {
 
         carregarUsuario()
 
+        // Clique na foto abre a câmera
         binding.imgPerfil.setOnClickListener {
             verificarPermissaoECamera()
         }
 
+        // Logout: desconecta e volta para a tela de login
         binding.btnLogout.setOnClickListener {
 
             FirebaseConfig.auth.signOut()
@@ -57,6 +65,10 @@ class PerfilFragment : Fragment() {
         return binding.root
     }
 
+    /**
+     * Busca os dados do usuário no Firestore e preenche a interface.
+     * Carrega a foto de perfil decodificando de Base64.
+     */
     private fun carregarUsuario() {
 
         val uid =
@@ -75,6 +87,7 @@ class PerfilFragment : Fragment() {
                     it.getString("email")
 
                 // Tenta ler por 'fotoBase64', se estiver nulo tenta ler pela chave curta 'foto'
+                // Tenta carregar a foto de qualquer uma das chaves
                 val fotoBase64 = it.getString("fotoBase64") ?: it.getString("foto")
                 if (!fotoBase64.isNullOrEmpty()) {
                     val bitmap = ImageUtils.base64ToBitmap(fotoBase64)
@@ -90,6 +103,9 @@ class PerfilFragment : Fragment() {
         _binding = null
     }
 
+    /**
+     * Lançador que processa o resultado da foto tirada
+     */
     private val tirarFotoLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -102,6 +118,7 @@ class PerfilFragment : Fragment() {
                 data?.extras?.get("data") as? Bitmap
             }
 
+            // Cria uma cópia mutável do Bitmap para garantir compatibilidade
             bitmap?.let {
                 val copia = it.copy(Bitmap.Config.ARGB_8888, true)
                 salvarFotoNoFirestore(copia)
@@ -109,6 +126,9 @@ class PerfilFragment : Fragment() {
         }
     }
 
+    /**
+     * Lançador para solicitar permissão da câmera
+     */
     private val requisitarCameraLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -123,6 +143,10 @@ class PerfilFragment : Fragment() {
         }
     }
 
+    /**
+     * Verifica se a permissão. Se sim, abre a câmera.
+     * Caso contrário, solicita a permissão.
+     */
     private fun verificarPermissaoECamera() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
@@ -135,11 +159,18 @@ class PerfilFragment : Fragment() {
         }
     }
 
+    /**
+     * Abre o app de câmera padrão do dispositivo.
+     */
     private fun abrirCamera() {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         tirarFotoLauncher.launch(intent)
     }
 
+    /**
+     * Converte a foto para Base64 e salva no Firestore.
+     * Atualiza tanto 'fotoBase64' quanto 'foto' para compatibilidade.
+     */
     private fun salvarFotoNoFirestore(bitmap: Bitmap) {
         val uid = FirebaseConfig.auth.currentUser?.uid ?: return
 

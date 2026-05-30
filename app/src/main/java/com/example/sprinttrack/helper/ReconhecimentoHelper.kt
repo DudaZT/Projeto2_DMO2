@@ -7,11 +7,19 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 
+/**
+ * Helper para reconhecimento de voz.
+ * Encapsula toda a lógica do SpeechRecognizer do Android.
+ * O ReconhecimentoHelper encapsula toda a complexidade da API SpeechRecognizer.
+ * Ele configura o idioma, inicia a escuta e devolve o texto reconhecido via callback.
+ * Tratamos cada tipo de erro separadamente para feedback ao usuário.
+ */
 class ReconhecimentoHelper(
     private val context: Context,
-    private val callback: Callback
+    private val callback: Callback // Interface para devolver resultado ou erro
 ) {
 
+    // Interface que a Activity implementa para receber os resultados
     interface Callback {
 
         fun onTextoReconhecido(texto: String)
@@ -19,11 +27,11 @@ class ReconhecimentoHelper(
         fun onErro(mensagem: String)
     }
 
-    private val recognizer =
-        SpeechRecognizer.createSpeechRecognizer(context)
+    // Instância do reconhecedor de voz do sistema
+    private val recognizer = SpeechRecognizer.createSpeechRecognizer(context)
 
     fun iniciarReconhecimento() {
-
+        // Verifica se o dispositivo suporta reconhecimento de voz
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
 
             callback.onErro(
@@ -33,6 +41,7 @@ class ReconhecimentoHelper(
             return
         }
 
+        // Configura a Intent com os parâmetros do reconhecimento
         val intent = Intent(
             RecognizerIntent.ACTION_RECOGNIZE_SPEECH
         )
@@ -42,21 +51,22 @@ class ReconhecimentoHelper(
             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
         )
 
-        intent.putExtra(
+        intent.putExtra( // Idioma português
             RecognizerIntent.EXTRA_LANGUAGE,
             "pt-BR"
         )
 
-        intent.putExtra(
+        intent.putExtra( // Texto exibido ao usuário
             RecognizerIntent.EXTRA_PROMPT,
             "Fale sua observação"
         )
 
+        // Configura o listener que recebe os eventos do reconhecimento
         recognizer.setRecognitionListener(
             object : RecognitionListener {
 
                 override fun onResults(results: Bundle?) {
-
+                    // Pega a primeira frase reconhecida
                     val texto =
                         results
                             ?.getStringArrayList(
@@ -77,7 +87,7 @@ class ReconhecimentoHelper(
                 }
 
                 override fun onError(error: Int) {
-
+                    // Mapeia códigos de erro
                     val mensagem = when (error) {
 
                         SpeechRecognizer.ERROR_NETWORK ->
@@ -102,6 +112,7 @@ class ReconhecimentoHelper(
                     callback.onErro(mensagem)
                 }
 
+                // Callbacks obrigatórios da interface
                 override fun onReadyForSpeech(params: Bundle?) {}
 
                 override fun onBeginningOfSpeech() {}
@@ -124,6 +135,9 @@ class ReconhecimentoHelper(
         recognizer.startListening(intent)
     }
 
+    /**
+     * Libera os recursos do reconhecedor quando não for mais necessário.
+     */
     fun destruir() {
 
         recognizer.destroy()

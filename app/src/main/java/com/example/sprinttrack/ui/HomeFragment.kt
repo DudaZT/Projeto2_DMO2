@@ -10,6 +10,12 @@ import com.example.sprinttrack.databinding.FragmentHomeBinding
 import com.example.sprinttrack.firebase.FirebaseConfig
 import java.util.Locale
 
+/**
+ * A Home é o dashboard do usuário.
+ * Mostramos o melhor tempo pessoal e o top 3 global.
+ * A métrica de eficiência é passos por segundo,
+ * que nivela comparações independente da distância.
+ */
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
@@ -27,9 +33,11 @@ class HomeFragment : Fragment() {
             false
         )
 
+        // Carrega os dados da tela: melhor tempo e top 3
         carregarMelhorTempo()
         carregarLeaderboard()
 
+        // Botão que abre a tela de novo treino
         binding.btnNovoTreino.setOnClickListener {
 
             startActivity(
@@ -47,6 +55,10 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+    /**
+     * Busca no Firestore o menor tempo de sprint do usuário logado.
+     * Filtra tempos menores que 1s para descartar registros inválidos.
+     */
     private fun carregarMelhorTempo() {
 
         val uid =
@@ -54,7 +66,7 @@ class HomeFragment : Fragment() {
 
         FirebaseConfig.firestore
             .collection("treinos")
-            .whereEqualTo("uid", uid)
+            .whereEqualTo("uid", uid) // Filtra só treinos do usuário
             .get()
             .addOnSuccessListener { result ->
 
@@ -80,7 +92,7 @@ class HomeFragment : Fragment() {
                 } else {
 
                     val melhorTempo = tempos.min()
-
+                    // Pega o menor valor da lista
                     binding.txtBestTime.text =
                         String.format(
                             Locale.getDefault(),
@@ -91,13 +103,17 @@ class HomeFragment : Fragment() {
             }
     }
 
+    /**
+     * Monta o top 3 do ranking global.
+     * Calcula eficiência como passos/segundo e ordena de forma decrescente.
+     */
     private fun carregarLeaderboard() {
 
         FirebaseConfig.firestore
             .collection("treinos")
             .get()
             .addOnSuccessListener { result ->
-
+                // Inicializa com placeholder
                 binding.txtLugar1.text = "1º Lugar: --"
                 binding.txtLugar2.text = "2º Lugar: --"
                 binding.txtLugar3.text = "3º Lugar: --"
@@ -118,6 +134,7 @@ class HomeFragment : Fragment() {
                     Triple(eficiencia, tempo, data)
                 }.sortedByDescending { it.first }
 
+                // Preenche até 3 posições
                 val limiteTop3 = if (treinosOrdenados.size > 3) 3 else treinosOrdenados.size
 
                 for (i in 0 until limiteTop3) {

@@ -1,13 +1,16 @@
-package com.example.sprinttrack
+package com.example.sprinttrack.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.sprinttrack.R
 import com.example.sprinttrack.databinding.ActivityMainBinding
-import com.example.sprinttrack.ui.HistoricoFragment
-import com.example.sprinttrack.ui.HomeFragment
-import com.example.sprinttrack.ui.PerfilFragment
 
+/**
+ * A MainActivity é o container principal.
+ * Ela gerencia a BottomNavigationView
+ * e faz a troca entre os 3 Fragments: Home, Histórico e Perfil.
+*/
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -19,8 +22,10 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
+        // Ao abrir o app, carrega a tela Home
         replaceFragment(HomeFragment())
 
+        // Configura a barra de navegação inferior com 3 abas
         binding.bottomNav.setOnItemSelectedListener {
 
             when(it.itemId) {
@@ -38,10 +43,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            true
+            true // Indica que o item foi selecionado
         }
     }
 
+    /**
+     * Substitui o Fragment exibido no container principal.
+     * Usamos 'replace' para manter apenas um Fragment por vez.
+     */
     private fun replaceFragment(fragment: Fragment) {
 
         supportFragmentManager
