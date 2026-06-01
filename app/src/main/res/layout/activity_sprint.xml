@@ -26,8 +26,6 @@
         android:textColor="@color/green"
         android:layout_marginTop="40dp"/>
 
-
-
     <TextView
         android:id="@+id/txtPassos"
         android:layout_width="wrap_content"
@@ -36,6 +34,15 @@
         android:textColor="@color/white"
         android:textSize="22sp"
         android:layout_marginTop="30dp"/>
+
+    <TextView
+        android:id="@+id/txtStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status: parado"
+        android:textColor="@color/green"
+        android:textSize="18sp"
+        android:layout_marginTop="10dp"/>
 
     <EditText
         android:id="@+id/edtObservacao"
@@ -57,8 +64,6 @@
         android:layout_height="55dp"
         android:text="PREPARAR"
         android:layout_marginTop="40dp"/>
-
-
 
     <Button
         android:id="@+id/btnFinalizar"

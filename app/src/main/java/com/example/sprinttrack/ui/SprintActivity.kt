@@ -181,7 +181,11 @@ class SprintActivity :
      */
     private fun configurarSensores() {
         // MotionSensor: o callback está vazio porque usamos apenas para registro
-        motionSensor = MotionSensorManager(this) {}
+        motionSensor = MotionSensorManager(this) {
+            runOnUiThread {
+                binding.txtStatus.text = "Correndo 🚀"
+            }
+        }
         // StepCounter: atualiza o TextView de passos na thread principal
         stepCounter = StepCounterManager(this) { totalPassos ->
 
