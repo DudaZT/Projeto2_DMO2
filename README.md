@@ -207,6 +207,8 @@ O código está estruturado nos seguintes pacotes:
 
 📌 Vídeo demonstrativo:
 
+https://github.com/user-attachments/assets/57fe79cc-75d4-4b71-8788-561268789687
+
 👉 [Download](video/videodemonstracao.mp4)
 
 ---
